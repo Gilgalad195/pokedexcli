@@ -2,7 +2,6 @@ package pokeapi
 
 import (
 	"encoding/json"
-	"io"
 )
 
 type LocationsResp struct {
@@ -15,14 +14,9 @@ type LocationsResp struct {
 	} `json:"results"`
 }
 
-func FormatResponse(body io.Reader) (*LocationsResp, error) {
-	data, err := io.ReadAll(body)
-	if err != nil {
-		return nil, err
-	}
-
+func FormatResponse(body []byte) (*LocationsResp, error) {
 	var locations LocationsResp
-	if err := json.Unmarshal(data, &locations); err != nil {
+	if err := json.Unmarshal(body, &locations); err != nil {
 		return nil, err
 	}
 	return &locations, nil
