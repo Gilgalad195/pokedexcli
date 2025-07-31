@@ -9,9 +9,11 @@ import (
 )
 
 type Config struct {
-	Next     string
-	Previous string
-	Cache    *pokecache.Cache
+	Next          string
+	Previous      string
+	MapCache      *pokecache.Cache
+	LocationCache *pokecache.Cache
+	Search        string
 }
 
 func GetLocations(url string, config *Config) ([]byte, error) {

@@ -13,13 +13,16 @@ import (
 
 func main() {
 
-	pokeCache := pokecache.NewCache(5 * time.Second)
+	mapCache := pokecache.NewCache(5 * time.Second)
+	locationCache := pokecache.NewCache(7 * time.Second)
 
 	myConfig := &pokeapi.Config{
 		//this initializes the struct with the starting API url.
-		Next:     "https://pokeapi.co/api/v2/location-area/",
-		Previous: "",
-		Cache:    pokeCache,
+		Next:          "https://pokeapi.co/api/v2/location-area/",
+		Previous:      "",
+		MapCache:      mapCache,
+		LocationCache: locationCache,
+		Search:        "",
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands
@@ -29,8 +32,11 @@ func main() {
 		hasToken := scanner.Scan()
 		if hasToken {
 			lowerString := cleanInput(scanner.Text())
-			userInput := lowerString[0]
-			if command, exists := commands[userInput]; exists {
+			cmdInput := lowerString[0]
+			if len(lowerString) > 1 {
+				myConfig.Search = lowerString[1]
+			}
+			if command, exists := commands[cmdInput]; exists {
 				err := command.callback(myConfig)
 				if err != nil {
 					fmt.Println("Error:", err)
@@ -69,7 +75,7 @@ func commandMap(myConfig *pokeapi.Config) error {
 		//declaring body and err for use later
 		var body []byte
 		var err error
-		val, found := myConfig.Cache.Get(myConfig.Next)
+		val, found := myConfig.MapCache.Get(myConfig.Next)
 		if found {
 			fmt.Println("This was in cache!")
 			body = val
@@ -78,7 +84,7 @@ func commandMap(myConfig *pokeapi.Config) error {
 			if err != nil {
 				return fmt.Errorf("failed to get locations: %v", err)
 			}
-			myConfig.Cache.Add(myConfig.Next, body)
+			myConfig.MapCache.Add(myConfig.Next, body)
 		}
 
 		data, err := pokeapi.FormatResponse(body)
@@ -104,7 +110,7 @@ func commandMapb(myConfig *pokeapi.Config) error {
 	} else {
 		var body []byte
 		var err error
-		val, found := myConfig.Cache.Get(myConfig.Previous)
+		val, found := myConfig.MapCache.Get(myConfig.Previous)
 		if found {
 			fmt.Println("This was in cache!")
 			body = val
@@ -113,7 +119,7 @@ func commandMapb(myConfig *pokeapi.Config) error {
 			if err != nil {
 				return fmt.Errorf("failed to get locations: %v", err)
 			}
-			myConfig.Cache.Add(myConfig.Previous, body)
+			myConfig.MapCache.Add(myConfig.Previous, body)
 		}
 
 		data, err := pokeapi.FormatResponse(body)
@@ -130,5 +136,15 @@ func commandMapb(myConfig *pokeapi.Config) error {
 		myConfig.Next = myConfig.Previous
 		myConfig.Previous = data.Previous
 	}
+	return nil
+}
+
+func commandExplore(myConfig *pokeapi.Config) error {
+	if myConfig.Search == "" {
+		return fmt.Errorf("please enter a location")
+	}
+
+	//locationUrl := myConfig.Next + myConfig.Search
+
 	return nil
 }

@@ -31,8 +31,13 @@ func init() {
 		},
 		"mapb": {
 			name:        "mapb",
-			description: "Diaplays previous 20 location areas",
+			description: "Displays previous 20 location areas",
 			callback:    commandMapb,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Searches an area for Pokemon",
+			callback:    commandExplore,
 		},
 	}
 }
