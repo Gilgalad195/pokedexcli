@@ -67,10 +67,18 @@ type LocationData struct {
 	} `json:"pokemon_encounters"`
 }
 
-func FormatResponse(body []byte) (*MapResp, error) {
-	var locations MapResp
-	if err := json.Unmarshal(body, &locations); err != nil {
+func FormatMapResponse(body []byte) (*MapResp, error) {
+	var response MapResp
+	if err := json.Unmarshal(body, &response); err != nil {
 		return nil, err
 	}
-	return &locations, nil
+	return &response, nil
+}
+
+func FormatLocationData(body []byte) (*LocationData, error) {
+	var response LocationData
+	if err := json.Unmarshal(body, &response); err != nil {
+		return nil, err
+	}
+	return &response, nil
 }

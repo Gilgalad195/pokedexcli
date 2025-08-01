@@ -5,7 +5,7 @@ import "github.com/gilgalad195/pokedexcli/internal/pokeapi"
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config) error
+	callback    func(*pokeapi.Config, string) error
 	//this is so the commands can receive and update the previous/next state.
 }
 
