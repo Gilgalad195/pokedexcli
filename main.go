@@ -32,16 +32,13 @@ func main() {
 		hasToken := scanner.Scan()
 		if hasToken {
 			lowerString := cleanInput(scanner.Text())
-			var searchLoc string
 			if len(lowerString) == 0 {
 				fmt.Println("Enter help if unsure of commands")
 			} else {
 				cmdInput := lowerString[0]
-				if len(lowerString) > 1 {
-					searchLoc = lowerString[1]
-				}
+				args := lowerString[1:]
 				if command, exists := commands[cmdInput]; exists {
-					err := command.callback(myConfig, searchLoc)
+					err := command.callback(myConfig, args)
 					if err != nil {
 						fmt.Println("Error:", err)
 					}
@@ -58,13 +55,13 @@ func cleanInput(text string) []string {
 	return cleanText
 }
 
-func commandExit(_ *pokeapi.Config, _ string) error {
+func commandExit(_ *pokeapi.Config, _ []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(_ *pokeapi.Config, _ string) error {
+func commandHelp(_ *pokeapi.Config, _ []string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Printf("Usage:\n\n")
 	for _, command := range commands {
@@ -73,7 +70,7 @@ func commandHelp(_ *pokeapi.Config, _ string) error {
 	return nil
 }
 
-func commandMap(myConfig *pokeapi.Config, _ string) error {
+func commandMap(myConfig *pokeapi.Config, _ []string) error {
 	if myConfig.Next == "" {
 		fmt.Println("you're on the last page")
 	} else {
@@ -109,7 +106,7 @@ func commandMap(myConfig *pokeapi.Config, _ string) error {
 	return nil
 }
 
-func commandMapb(myConfig *pokeapi.Config, _ string) error {
+func commandMapb(myConfig *pokeapi.Config, _ []string) error {
 	if myConfig.Previous == "" {
 		fmt.Println("you're on the first page")
 	} else {
@@ -144,12 +141,12 @@ func commandMapb(myConfig *pokeapi.Config, _ string) error {
 	return nil
 }
 
-func commandExplore(myConfig *pokeapi.Config, searchLoc string) error {
-	if searchLoc == "" {
+func commandExplore(myConfig *pokeapi.Config, args []string) error {
+	if len(args) == 0 {
 		fmt.Println("please enter a location")
 	} else {
 
-		locationUrl := myConfig.BaseUrl + searchLoc
+		locationUrl := myConfig.BaseUrl + args[0]
 
 		var body []byte
 		var err error
