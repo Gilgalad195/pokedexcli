@@ -16,7 +16,7 @@ type Config struct {
 	LocationCache *pokecache.Cache
 }
 
-func GetLocations(url string, config *Config) ([]byte, error) {
+func FetchData(url string, config *Config) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

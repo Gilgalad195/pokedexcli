@@ -11,6 +11,8 @@ import (
 	"github.com/gilgalad195/pokedexcli/internal/pokecache"
 )
 
+//make pokedex map here.
+
 func main() {
 
 	mapCache := pokecache.NewCache(30 * time.Minute)
@@ -24,6 +26,8 @@ func main() {
 		MapCache:      mapCache,
 		LocationCache: locationCache,
 	}
+
+	//pokedex := make(map[string]pokeapi.PokemonData)
 
 	//this is my REPL loop, which looks for user input and executes commands
 	scanner := bufio.NewScanner(os.Stdin)
@@ -82,7 +86,7 @@ func commandMap(myConfig *pokeapi.Config, _ []string) error {
 			fmt.Println("This was in cache!")
 			body = val
 		} else {
-			body, err = pokeapi.GetLocations(myConfig.Next, myConfig)
+			body, err = pokeapi.FetchData(myConfig.Next, myConfig)
 			if err != nil {
 				return fmt.Errorf("failed to get locations: %v", err)
 			}
@@ -117,7 +121,7 @@ func commandMapb(myConfig *pokeapi.Config, _ []string) error {
 			fmt.Println("This was in cache!")
 			body = val
 		} else {
-			body, err = pokeapi.GetLocations(myConfig.Previous, myConfig)
+			body, err = pokeapi.FetchData(myConfig.Previous, myConfig)
 			if err != nil {
 				return fmt.Errorf("failed to get locations: %v", err)
 			}
@@ -155,7 +159,7 @@ func commandExplore(myConfig *pokeapi.Config, args []string) error {
 			fmt.Println("This was in cache!")
 			body = val
 		} else {
-			body, err = pokeapi.GetLocations(locationUrl, myConfig)
+			body, err = pokeapi.FetchData(locationUrl, myConfig)
 			if err != nil {
 				return fmt.Errorf("failed to get locations: %v", err)
 			}
@@ -175,3 +179,27 @@ func commandExplore(myConfig *pokeapi.Config, args []string) error {
 	}
 	return nil
 }
+
+// func commandCatch(myConfig *pokeapi.Config, args []string) error {
+// 	if len(args) == 0 {
+// 		fmt.Println("please enter a pokemon name")
+// 	} else {
+// 		pokeEndpoint := "https://pokeapi.co/api/v2/pokemon/"
+// 		pokeName := args[0]
+// 		pokeUrl := pokeEndpoint + pokeName
+
+// 		body, err := pokeapi.FetchData(pokeUrl, myConfig)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to get locations: %v", err)
+// 		}
+
+// 		pokemon, err := pokeapi.FormatPokemonData(body)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to format response: %v", err)
+// 		}
+
+// 		pokemon.BaseExperience
+// 	}
+
+// 	return nil
+// }
