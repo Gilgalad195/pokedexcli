@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"math/rand"
 	"os"
 	"strings"
 	"time"
@@ -10,8 +11,6 @@ import (
 	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
 	"github.com/gilgalad195/pokedexcli/internal/pokecache"
 )
-
-//make pokedex map here.
 
 func main() {
 
@@ -25,9 +24,8 @@ func main() {
 		Previous:      "",
 		MapCache:      mapCache,
 		LocationCache: locationCache,
+		CaughtPokemon: map[string]pokeapi.PokemonData{},
 	}
-
-	//pokedex := make(map[string]pokeapi.PokemonData)
 
 	//this is my REPL loop, which looks for user input and executes commands
 	scanner := bufio.NewScanner(os.Stdin)
@@ -88,7 +86,7 @@ func commandMap(myConfig *pokeapi.Config, _ []string) error {
 		} else {
 			body, err = pokeapi.FetchData(myConfig.Next, myConfig)
 			if err != nil {
-				return fmt.Errorf("failed to get locations: %v", err)
+				return fmt.Errorf("failed to fetch data: %v", err)
 			}
 			myConfig.MapCache.Add(myConfig.Next, body)
 		}
@@ -123,7 +121,7 @@ func commandMapb(myConfig *pokeapi.Config, _ []string) error {
 		} else {
 			body, err = pokeapi.FetchData(myConfig.Previous, myConfig)
 			if err != nil {
-				return fmt.Errorf("failed to get locations: %v", err)
+				return fmt.Errorf("failed to fetch data: %v", err)
 			}
 			myConfig.MapCache.Add(myConfig.Previous, body)
 		}
@@ -161,7 +159,7 @@ func commandExplore(myConfig *pokeapi.Config, args []string) error {
 		} else {
 			body, err = pokeapi.FetchData(locationUrl, myConfig)
 			if err != nil {
-				return fmt.Errorf("failed to get locations: %v", err)
+				return fmt.Errorf("failed to fetch data: %v", err)
 			}
 			myConfig.LocationCache.Add(locationUrl, body)
 		}
@@ -180,26 +178,66 @@ func commandExplore(myConfig *pokeapi.Config, args []string) error {
 	return nil
 }
 
-// func commandCatch(myConfig *pokeapi.Config, args []string) error {
-// 	if len(args) == 0 {
-// 		fmt.Println("please enter a pokemon name")
-// 	} else {
-// 		pokeEndpoint := "https://pokeapi.co/api/v2/pokemon/"
-// 		pokeName := args[0]
-// 		pokeUrl := pokeEndpoint + pokeName
+func commandCatch(myConfig *pokeapi.Config, args []string) error {
+	if len(args) == 0 {
+		fmt.Println("please enter a pokemon name")
+	} else {
+		pokeEndpoint := "https://pokeapi.co/api/v2/pokemon/"
+		pokeName := args[0]
+		pokeUrl := pokeEndpoint + pokeName
 
-// 		body, err := pokeapi.FetchData(pokeUrl, myConfig)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to get locations: %v", err)
-// 		}
+		body, err := pokeapi.FetchData(pokeUrl, myConfig)
+		if err != nil {
+			return fmt.Errorf("failed to fetch data: %v", err)
+		}
 
-// 		pokemon, err := pokeapi.FormatPokemonData(body)
-// 		if err != nil {
-// 			return fmt.Errorf("failed to format response: %v", err)
-// 		}
+		pokemon, err := pokeapi.FormatPokemonData(body)
+		if err != nil {
+			return fmt.Errorf("failed to format response: %v", err)
+		}
 
-// 		pokemon.BaseExperience
-// 	}
+		fmt.Printf("Throwing a Pokeball at %s...\n", pokeName)
+		roll := rand.Intn(pokemon.BaseExperience)
+		var success bool
+		if roll <= 40 {
+			success = true
+		}
 
-// 	return nil
-// }
+		if success {
+			fmt.Printf("%s was caught!\n", pokeName)
+			myConfig.CaughtPokemon[pokeName] = *pokemon
+		} else {
+			fmt.Printf("%s escaped!\n", pokeName)
+		}
+	}
+
+	return nil
+}
+
+func commandInspect(myConfig *pokeapi.Config, args []string) error {
+	pokeName := args[0]
+	if pokemon, exists := myConfig.CaughtPokemon[pokeName]; exists {
+		fmt.Printf("Name: %s\n", pokemon.Name)
+		fmt.Printf("Height: %d\n", pokemon.Height)
+		fmt.Printf("Weight: %d\n", pokemon.Weight)
+		fmt.Println("Stats:")
+		for _, stat := range pokemon.Stats {
+			fmt.Printf("  -%s: %d\n", stat.Stat.Name, stat.BaseStat)
+		}
+		fmt.Println("Types:")
+		for _, poketype := range pokemon.Types {
+			fmt.Printf("  - %s\n", poketype.Type.Name)
+		}
+	} else {
+		fmt.Printf("you have not caught that pokemon\n")
+	}
+	return nil
+}
+
+func commandPokedex(myConfig *pokeapi.Config, _ []string) error {
+	fmt.Println("Your Pokedex:")
+	for name := range myConfig.CaughtPokemon {
+		fmt.Printf(" - %s\n", name)
+	}
+	return nil
+}

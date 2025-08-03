@@ -14,6 +14,7 @@ type Config struct {
 	Previous      string
 	MapCache      *pokecache.Cache
 	LocationCache *pokecache.Cache
+	CaughtPokemon map[string]PokemonData
 }
 
 func FetchData(url string, config *Config) ([]byte, error) {
