@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"math/rand"
 	"os"
@@ -239,5 +240,16 @@ func commandPokedex(myConfig *pokeapi.Config, _ []string) error {
 	for name := range myConfig.CaughtPokemon {
 		fmt.Printf(" - %s\n", name)
 	}
+	return nil
+}
+
+func commandSave(myConfig *pokeapi.Config, _ []string) error {
+	jsonSave, err := json.Marshal(myConfig)
+	if err != nil {
+		return fmt.Errorf("save failed: %v", err)
+	}
+
+	fmt.Println(string(jsonSave))
+	//this is where I need to add OS manipulation. Research how to do that in Go.
 	return nil
 }
