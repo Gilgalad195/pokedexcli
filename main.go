@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"math/rand"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -249,7 +250,44 @@ func commandSave(myConfig *pokeapi.Config, _ []string) error {
 		return fmt.Errorf("save failed: %v", err)
 	}
 
-	fmt.Println(string(jsonSave))
-	//this is where I need to add OS manipulation. Research how to do that in Go.
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return fmt.Errorf("save failed. config dir error: %v", err)
+	}
+
+	saveDir := filepath.Join(configDir, "PokedexCLI", "saves")
+	saveFilePath := filepath.Join(saveDir, "pokesave.json")
+	err = os.MkdirAll(saveDir, 0755)
+	if err != nil {
+		return fmt.Errorf("error creating save dir: %v", err)
+	}
+	err = os.WriteFile(saveFilePath, jsonSave, 0644)
+	if err != nil {
+		return fmt.Errorf("error writing to save: %v", err)
+	}
+	fmt.Println("Save successful!")
+
+	return nil
+}
+
+func commandLoad(myConfig *pokeapi.Config, _ []string) error {
+	configDir, err := os.UserConfigDir()
+	if err != nil {
+		return fmt.Errorf("config dir error: %v", err)
+	}
+	saveDir := filepath.Join(configDir, "PokedexCLI", "saves")
+	saveFilePath := filepath.Join(saveDir, "pokesave.json")
+
+	data, err := os.ReadFile(saveFilePath)
+	if err != nil {
+		return fmt.Errorf("save read failed: %v", err)
+	}
+
+	err = json.Unmarshal(data, &myConfig)
+	if err != nil {
+		return fmt.Errorf("load state failed: %v", err)
+	}
+	fmt.Println("Save data loaded!")
+
 	return nil
 }

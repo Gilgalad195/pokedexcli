@@ -59,5 +59,10 @@ func init() {
 			description: "saves your game",
 			callback:    commandSave,
 		},
+		"load": {
+			name:        "load",
+			description: "loads a previous gamestate",
+			callback:    commandLoad,
+		},
 	}
 }
