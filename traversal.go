@@ -1,6 +1,10 @@
 package main
 
-import "github.com/gilgalad195/pokedexcli/internal/pokeapi"
+import (
+	"fmt"
+
+	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
+)
 
 func GetLocationUrl(myConfig *pokeapi.Config) string {
 	baseUrl := "https://pokeapi.co/api/v2/location-area/"
@@ -14,6 +18,17 @@ func CheckValidPath(paths []string, target string) bool {
 		}
 	}
 	return false
+}
+
+func HasEncounters(url string) (bool, error) {
+	resp, err := pokeapi.FetchHeaders(url)
+	if err != nil {
+		return false, fmt.Errorf("failed to fetch headers: %v", err)
+	}
+	if resp.StatusCode == 404 {
+		return false, nil
+	}
+	return true, nil
 }
 
 var WorldMap = map[string][]string{

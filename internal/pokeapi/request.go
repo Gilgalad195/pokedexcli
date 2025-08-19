@@ -9,10 +9,12 @@ import (
 )
 
 type Config struct {
-	CurrentLocation string                 `json:"current_location"`
-	MapCache        *pokecache.Cache       `json:"-"`
-	LocationCache   *pokecache.Cache       `json:"-"`
-	CaughtPokemon   map[string]PokemonData `json:"caught"`
+	GameVersion      string                 `json:"game_version"`
+	CurrentLocation  string                 `json:"current_location"`
+	MapCache         *pokecache.Cache       `json:"-"`
+	LocationCache    *pokecache.Cache       `json:"-"`
+	LastFoundPokemon string                 `json:"-"`
+	CaughtPokemon    map[string]PokemonData `json:"caught"`
 }
 
 func FetchData(url string, config *Config) ([]byte, error) {
@@ -34,4 +36,13 @@ func FetchData(url string, config *Config) ([]byte, error) {
 	}
 
 	return body, nil
+}
+
+func FetchHeaders(url string) (*http.Response, error) {
+	req, _ := http.NewRequest("HEAD", url, nil)
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("an error occurred: %v", err)
+	}
+	return resp, nil
 }

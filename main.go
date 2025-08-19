@@ -20,10 +20,12 @@ func main() {
 	locationCache := pokecache.NewCache(30 * time.Minute)
 
 	myConfig := &pokeapi.Config{
-		CurrentLocation: "littleroot-town-area",
-		MapCache:        mapCache,
-		LocationCache:   locationCache,
-		CaughtPokemon:   map[string]pokeapi.PokemonData{},
+		GameVersion:      "sapphire",
+		CurrentLocation:  "littleroot-town-area",
+		MapCache:         mapCache,
+		LocationCache:    locationCache,
+		LastFoundPokemon: "",
+		CaughtPokemon:    map[string]pokeapi.PokemonData{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands
@@ -80,7 +82,7 @@ func commandLook(myConfig *pokeapi.Config, _ []string) error {
 	fmt.Printf("You look around '%v' and see the following paths:\n", myConfig.CurrentLocation)
 	availablePaths := WorldMap[myConfig.CurrentLocation]
 	for _, path := range availablePaths {
-		fmt.Printf("- %s\n", path)
+		fmt.Printf(" - %s\n", path)
 	}
 	return nil
 }
@@ -92,6 +94,7 @@ func commandMove(myConfig *pokeapi.Config, args []string) error {
 	} else {
 		myConfig.CurrentLocation = args[0]
 		fmt.Printf("You are now in '%s'\n", myConfig.CurrentLocation)
+		myConfig.LastFoundPokemon = ""
 	}
 	return nil
 }
@@ -99,31 +102,58 @@ func commandMove(myConfig *pokeapi.Config, args []string) error {
 func commandExplore(myConfig *pokeapi.Config, _ []string) error {
 	locationUrl := GetLocationUrl(myConfig)
 
-	var body []byte
-	var err error
-	val, found := myConfig.LocationCache.Get(locationUrl)
-	if found {
-		fmt.Println("This was in cache!")
-		body = val
-	} else {
-		body, err = pokeapi.FetchData(locationUrl, myConfig)
-		if err != nil {
-			return fmt.Errorf("failed to fetch data: %v", err)
-		}
-		myConfig.LocationCache.Add(locationUrl, body)
-	}
-
-	//data is the formatted LocationData struct
-	data, err := pokeapi.FormatLocationData(body)
+	hasEncounters, err := HasEncounters(locationUrl)
 	if err != nil {
-		return fmt.Errorf("failed to format response: %v", err)
-	}
-	encounters := data.PokemonEncounters
-	fmt.Println("Found Pokemon:")
-	for _, pokemon := range encounters {
-		fmt.Printf("- %s\n", pokemon.Pokemon.Name)
-	}
+		fmt.Printf("unable to determine encounter status: %v\n", err)
+	} else if !hasEncounters {
+		fmt.Println("there are no wild Pokémon to find here")
+	} else {
 
+		var body []byte
+		var err error
+		val, found := myConfig.LocationCache.Get(locationUrl)
+		if found {
+			fmt.Println("This was in cache!")
+			body = val
+		} else {
+			body, err = pokeapi.FetchData(locationUrl, myConfig)
+			if err != nil {
+				return fmt.Errorf("failed to fetch data: %v", err)
+			}
+			myConfig.LocationCache.Add(locationUrl, body)
+		}
+
+		//data is the formatted LocationData struct
+		data, err := pokeapi.FormatLocationData(body)
+		if err != nil {
+			return fmt.Errorf("failed to format response: %v", err)
+		}
+		encounters := data.PokemonEncounters
+		var availablePokemon []string
+
+		fmt.Println("The following pokemon can be found here:")
+		for _, encounter := range encounters {
+			var versions []string
+			for _, vd := range encounter.VersionDetails {
+				versions = append(versions, vd.Version.Name)
+			}
+
+			if CheckValidVersion(versions, myConfig.GameVersion) {
+				fmt.Printf(" - %s\n", encounter.Pokemon.Name)
+				availablePokemon = append(availablePokemon, encounter.Pokemon.Name)
+			}
+		}
+
+		if len(availablePokemon) > 0 {
+			roll := rand.Intn(len(availablePokemon))
+			foundPokemon := availablePokemon[roll]
+			myConfig.LastFoundPokemon = foundPokemon
+			fmt.Println("You found a wild Pokemon!")
+			fmt.Printf(" - %s\n\n", foundPokemon)
+		} else {
+			fmt.Println(" - there are no pokemon to find")
+		}
+	}
 	return nil
 }
 
@@ -131,32 +161,28 @@ func commandCatch(myConfig *pokeapi.Config, args []string) error {
 	if len(args) == 0 {
 		fmt.Println("please enter a pokemon name")
 	} else {
-		pokeEndpoint := "https://pokeapi.co/api/v2/pokemon/"
 		pokeName := args[0]
-		pokeUrl := pokeEndpoint + pokeName
-
-		body, err := pokeapi.FetchData(pokeUrl, myConfig)
-		if err != nil {
-			return fmt.Errorf("failed to fetch data: %v", err)
-		}
-
-		pokemon, err := pokeapi.FormatPokemonData(body)
-		if err != nil {
-			return fmt.Errorf("failed to format response: %v", err)
-		}
-
-		fmt.Printf("Throwing a Pokeball at %s...\n", pokeName)
-		roll := rand.Intn(pokemon.BaseExperience)
-		var success bool
-		if roll <= 40 {
-			success = true
-		}
-
-		if success {
-			fmt.Printf("%s was caught!\n", pokeName)
-			myConfig.CaughtPokemon[pokeName] = *pokemon
+		if pokeName != myConfig.LastFoundPokemon {
+			fmt.Println("that pokemon isn't here right now")
 		} else {
-			fmt.Printf("%s escaped!\n", pokeName)
+			pokemon, err := GetPokemonData(pokeName, myConfig)
+			if err != nil {
+				return fmt.Errorf("failed to get pokemon data: %v", err)
+			}
+
+			fmt.Printf("Throwing a Pokeball at %s...\n", pokeName)
+			roll := rand.Intn(pokemon.BaseExperience)
+			var success bool
+			if roll <= 40 {
+				success = true
+			}
+
+			if success {
+				fmt.Printf("%s was caught!\n", pokeName)
+				myConfig.CaughtPokemon[pokeName] = *pokemon
+			} else {
+				fmt.Printf("%s escaped!\n", pokeName)
+			}
 		}
 	}
 
