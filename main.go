@@ -77,8 +77,11 @@ func commandMap(myConfig *pokeapi.Config, _ []string) error {
 }
 
 func commandLook(myConfig *pokeapi.Config, _ []string) error {
-	fmt.Printf("You look around %v\n", myConfig.CurrentLocation)
-	fmt.Printf("You see the following paths: %v\n", WorldMap[myConfig.CurrentLocation])
+	fmt.Printf("You look around '%v' and see the following paths:\n", myConfig.CurrentLocation)
+	availablePaths := WorldMap[myConfig.CurrentLocation]
+	for _, path := range availablePaths {
+		fmt.Printf("- %s\n", path)
+	}
 	return nil
 }
 
@@ -88,7 +91,7 @@ func commandMove(myConfig *pokeapi.Config, args []string) error {
 		return nil
 	} else {
 		myConfig.CurrentLocation = args[0]
-		fmt.Printf("You are now in %v\n", myConfig.CurrentLocation)
+		fmt.Printf("You are now in '%s'\n", myConfig.CurrentLocation)
 	}
 	return nil
 }
