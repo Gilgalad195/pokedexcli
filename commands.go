@@ -26,13 +26,8 @@ func init() {
 		},
 		"map": {
 			name:        "map",
-			description: "Displays next 20 location areas",
+			description: "Displays a list of visited locations",
 			callback:    commandMap,
-		},
-		"mapb": {
-			name:        "mapb",
-			description: "Displays previous 20 location areas",
-			callback:    commandMapb,
 		},
 		"explore": {
 			name:        "explore",
@@ -46,23 +41,33 @@ func init() {
 		},
 		"inspect": {
 			name:        "inspect",
-			description: "inspects a Pokemon that you have caught",
+			description: "Inspects a Pokemon that you have caught",
 			callback:    commandInspect,
 		},
 		"pokedex": {
 			name:        "pokedex",
-			description: "lists all of the pokemon you have caught",
+			description: "Lists all of the pokemon you have caught",
 			callback:    commandPokedex,
 		},
 		"save": {
 			name:        "save",
-			description: "saves your game",
+			description: "Saves your game",
 			callback:    commandSave,
 		},
 		"load": {
 			name:        "load",
-			description: "loads a previous gamestate",
+			description: "Loads a previous gamestate",
 			callback:    commandLoad,
+		},
+		"look": {
+			name:        "look",
+			description: "Looks around to find possible paths",
+			callback:    commandLook,
+		},
+		"move": {
+			name:        "move",
+			description: "Moves to the desired location",
+			callback:    commandMove,
 		},
 	}
 }

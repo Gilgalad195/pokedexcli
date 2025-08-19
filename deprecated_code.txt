@@ -1,0 +1,68 @@
+// func commandMap(myConfig *pokeapi.Config, _ []string) error {
+// 	locationUrl := LocationURLConstructor(myConfig.CurrentLocation)
+// 		//declaring body and err for use later
+// 		var body []byte
+// 		var err error
+// 		val, found := myConfig.MapCache.Get(locationUrl)
+// 		if found {
+// 			fmt.Println("This was in cache!")
+// 			body = val
+// 		} else {
+// 			body, err = pokeapi.FetchData(locationUrl, myConfig)
+// 			if err != nil {
+// 				return fmt.Errorf("failed to fetch data: %v", err)
+// 			}
+// 			myConfig.MapCache.Add(locationUrl, body)
+// 		}
+
+// 		data, err := pokeapi.FormatMapResponse(body)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to format response: %v", err)
+// 		}
+// 		locations := data.Results
+// 		for i, location := range locations {
+// 			if i >= 20 {
+// 				break
+// 			}
+// 			fmt.Println(location.Name)
+// 		}
+// 		myConfig.Previous = myConfig.Next
+// 		myConfig.Next = data.Next
+
+// 	return nil
+// }
+
+// func commandMapb(myConfig *pokeapi.Config, _ []string) error {
+// 	if myConfig.Previous == "" {
+// 		fmt.Println("you're on the first page")
+// 	} else {
+// 		var body []byte
+// 		var err error
+// 		val, found := myConfig.MapCache.Get(myConfig.Previous)
+// 		if found {
+// 			fmt.Println("This was in cache!")
+// 			body = val
+// 		} else {
+// 			body, err = pokeapi.FetchData(myConfig.Previous, myConfig)
+// 			if err != nil {
+// 				return fmt.Errorf("failed to fetch data: %v", err)
+// 			}
+// 			myConfig.MapCache.Add(myConfig.Previous, body)
+// 		}
+
+// 		data, err := pokeapi.FormatMapResponse(body)
+// 		if err != nil {
+// 			return fmt.Errorf("failed to format response: %v", err)
+// 		}
+// 		locations := data.Results
+// 		for i, location := range locations {
+// 			if i >= 20 {
+// 				break
+// 			}
+// 			fmt.Println(location.Name)
+// 		}
+// 		myConfig.Next = myConfig.Previous
+// 		myConfig.Previous = data.Previous
+// 	}
+// 	return nil
+// }

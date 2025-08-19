@@ -20,13 +20,10 @@ func main() {
 	locationCache := pokecache.NewCache(30 * time.Minute)
 
 	myConfig := &pokeapi.Config{
-		//this initializes the struct with the starting API url.
-		BaseUrl:       "https://pokeapi.co/api/v2/location-area/",
-		Next:          "https://pokeapi.co/api/v2/location-area/",
-		Previous:      "",
-		MapCache:      mapCache,
-		LocationCache: locationCache,
-		CaughtPokemon: map[string]pokeapi.PokemonData{},
+		CurrentLocation: "littleroot-town-area",
+		MapCache:        mapCache,
+		LocationCache:   locationCache,
+		CaughtPokemon:   map[string]pokeapi.PokemonData{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands
@@ -75,108 +72,55 @@ func commandHelp(_ *pokeapi.Config, _ []string) error {
 }
 
 func commandMap(myConfig *pokeapi.Config, _ []string) error {
-	if myConfig.Next == "" {
-		fmt.Println("you're on the last page")
-	} else {
-		//declaring body and err for use later
-		var body []byte
-		var err error
-		val, found := myConfig.MapCache.Get(myConfig.Next)
-		if found {
-			fmt.Println("This was in cache!")
-			body = val
-		} else {
-			body, err = pokeapi.FetchData(myConfig.Next, myConfig)
-			if err != nil {
-				return fmt.Errorf("failed to fetch data: %v", err)
-			}
-			myConfig.MapCache.Add(myConfig.Next, body)
-		}
+	fmt.Println("Your map is concerningly empty.")
+	return nil
+}
 
-		data, err := pokeapi.FormatMapResponse(body)
-		if err != nil {
-			return fmt.Errorf("failed to format response: %v", err)
-		}
-		locations := data.Results
-		for i, location := range locations {
-			if i >= 20 {
-				break
-			}
-			fmt.Println(location.Name)
-		}
-		myConfig.Previous = myConfig.Next
-		myConfig.Next = data.Next
+func commandLook(myConfig *pokeapi.Config, _ []string) error {
+	fmt.Printf("You look around %v\n", myConfig.CurrentLocation)
+	fmt.Printf("You see the following paths: %v\n", WorldMap[myConfig.CurrentLocation])
+	return nil
+}
+
+func commandMove(myConfig *pokeapi.Config, args []string) error {
+	if !CheckValidPath(WorldMap[myConfig.CurrentLocation], args[0]) {
+		fmt.Println("You can't get there from here!")
+		return nil
+	} else {
+		myConfig.CurrentLocation = args[0]
+		fmt.Printf("You are now in %v\n", myConfig.CurrentLocation)
 	}
 	return nil
 }
 
-func commandMapb(myConfig *pokeapi.Config, _ []string) error {
-	if myConfig.Previous == "" {
-		fmt.Println("you're on the first page")
+func commandExplore(myConfig *pokeapi.Config, _ []string) error {
+	locationUrl := GetLocationUrl(myConfig)
+
+	var body []byte
+	var err error
+	val, found := myConfig.LocationCache.Get(locationUrl)
+	if found {
+		fmt.Println("This was in cache!")
+		body = val
 	} else {
-		var body []byte
-		var err error
-		val, found := myConfig.MapCache.Get(myConfig.Previous)
-		if found {
-			fmt.Println("This was in cache!")
-			body = val
-		} else {
-			body, err = pokeapi.FetchData(myConfig.Previous, myConfig)
-			if err != nil {
-				return fmt.Errorf("failed to fetch data: %v", err)
-			}
-			myConfig.MapCache.Add(myConfig.Previous, body)
-		}
-
-		data, err := pokeapi.FormatMapResponse(body)
+		body, err = pokeapi.FetchData(locationUrl, myConfig)
 		if err != nil {
-			return fmt.Errorf("failed to format response: %v", err)
+			return fmt.Errorf("failed to fetch data: %v", err)
 		}
-		locations := data.Results
-		for i, location := range locations {
-			if i >= 20 {
-				break
-			}
-			fmt.Println(location.Name)
-		}
-		myConfig.Next = myConfig.Previous
-		myConfig.Previous = data.Previous
+		myConfig.LocationCache.Add(locationUrl, body)
 	}
-	return nil
-}
 
-func commandExplore(myConfig *pokeapi.Config, args []string) error {
-	if len(args) == 0 {
-		fmt.Println("please enter a location")
-	} else {
-
-		locationUrl := myConfig.BaseUrl + args[0]
-
-		var body []byte
-		var err error
-		val, found := myConfig.LocationCache.Get(locationUrl)
-		if found {
-			fmt.Println("This was in cache!")
-			body = val
-		} else {
-			body, err = pokeapi.FetchData(locationUrl, myConfig)
-			if err != nil {
-				return fmt.Errorf("failed to fetch data: %v", err)
-			}
-			myConfig.LocationCache.Add(locationUrl, body)
-		}
-
-		//data is the formatted LocationData struct
-		data, err := pokeapi.FormatLocationData(body)
-		if err != nil {
-			return fmt.Errorf("failed to format response: %v", err)
-		}
-		encounters := data.PokemonEncounters
-		fmt.Println("Found Pokemon:")
-		for _, pokemon := range encounters {
-			fmt.Printf("- %s\n", pokemon.Pokemon.Name)
-		}
+	//data is the formatted LocationData struct
+	data, err := pokeapi.FormatLocationData(body)
+	if err != nil {
+		return fmt.Errorf("failed to format response: %v", err)
 	}
+	encounters := data.PokemonEncounters
+	fmt.Println("Found Pokemon:")
+	for _, pokemon := range encounters {
+		fmt.Printf("- %s\n", pokemon.Pokemon.Name)
+	}
+
 	return nil
 }
 

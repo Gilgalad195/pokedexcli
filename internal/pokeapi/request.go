@@ -9,12 +9,10 @@ import (
 )
 
 type Config struct {
-	BaseUrl       string                 `json:"location_url"`
-	Next          string                 `json:"next_location"`
-	Previous      string                 `json:"previous_location"`
-	MapCache      *pokecache.Cache       `json:"-"`
-	LocationCache *pokecache.Cache       `json:"-"`
-	CaughtPokemon map[string]PokemonData `json:"caught"`
+	CurrentLocation string                 `json:"current_location"`
+	MapCache        *pokecache.Cache       `json:"-"`
+	LocationCache   *pokecache.Cache       `json:"-"`
+	CaughtPokemon   map[string]PokemonData `json:"caught"`
 }
 
 func FetchData(url string, config *Config) ([]byte, error) {
