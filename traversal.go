@@ -3,10 +3,11 @@ package main
 import (
 	"fmt"
 
+	"github.com/gilgalad195/pokedexcli/internal/gamedata"
 	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
 )
 
-func GetLocationUrl(myConfig *pokeapi.Config) string {
+func GetLocationUrl(myConfig *gamedata.Config) string {
 	baseUrl := "https://pokeapi.co/api/v2/location-area/"
 	return baseUrl + myConfig.CurrentLocation + "/"
 }

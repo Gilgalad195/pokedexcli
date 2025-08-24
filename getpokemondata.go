@@ -1,8 +1,9 @@
-package gamedata
+package main
 
 import (
 	"fmt"
 
+	"github.com/gilgalad195/pokedexcli/internal/gamedata"
 	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
 )
 
@@ -15,7 +16,7 @@ func CheckValidVersion(versions []string, target string) bool {
 	return false
 }
 
-func GetPokemonData(name string, myConfig *pokeapi.Config) (*pokeapi.PokemonData, error) {
+func GetPokemonData(name string, myConfig *gamedata.Config) (*gamedata.PokemonData, error) {
 	pokeEndpoint := "https://pokeapi.co/api/v2/pokemon/"
 	pokeUrl := pokeEndpoint + name
 

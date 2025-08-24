@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gilgalad195/pokedexcli/internal/gamedata"
 	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
 	"github.com/gilgalad195/pokedexcli/internal/pokecache"
 )
@@ -19,13 +20,14 @@ func main() {
 	mapCache := pokecache.NewCache(30 * time.Minute)
 	locationCache := pokecache.NewCache(30 * time.Minute)
 
-	myConfig := &pokeapi.Config{
+	myConfig := &gamedata.Config{
 		GameVersion:      "sapphire",
 		CurrentLocation:  "littleroot-town-area",
 		MapCache:         mapCache,
 		LocationCache:    locationCache,
 		LastFoundPokemon: "",
-		CaughtPokemon:    map[string]pokeapi.PokemonData{},
+		CaughtPokemon:    map[string]gamedata.PokemonData{},
+		PartyPokemon:     map[string]gamedata.PokemonStatus{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands
@@ -58,13 +60,13 @@ func cleanInput(text string) []string {
 	return cleanText
 }
 
-func commandExit(_ *pokeapi.Config, _ []string) error {
+func commandExit(_ *gamedata.Config, _ []string) error {
 	fmt.Println("Closing the Pokedex... Goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp(_ *pokeapi.Config, _ []string) error {
+func commandHelp(_ *gamedata.Config, _ []string) error {
 	fmt.Println("Welcome to the Pokedex!")
 	fmt.Printf("Usage:\n\n")
 	for _, command := range commands {
@@ -73,12 +75,12 @@ func commandHelp(_ *pokeapi.Config, _ []string) error {
 	return nil
 }
 
-func commandMap(myConfig *pokeapi.Config, _ []string) error {
+func commandMap(myConfig *gamedata.Config, _ []string) error {
 	fmt.Println("Your map is concerningly empty.")
 	return nil
 }
 
-func commandLook(myConfig *pokeapi.Config, _ []string) error {
+func commandLook(myConfig *gamedata.Config, _ []string) error {
 	fmt.Printf("You look around '%v' and see the following paths:\n", myConfig.CurrentLocation)
 	availablePaths := WorldMap[myConfig.CurrentLocation]
 	for _, path := range availablePaths {
@@ -87,7 +89,7 @@ func commandLook(myConfig *pokeapi.Config, _ []string) error {
 	return nil
 }
 
-func commandMove(myConfig *pokeapi.Config, args []string) error {
+func commandMove(myConfig *gamedata.Config, args []string) error {
 	if !CheckValidPath(WorldMap[myConfig.CurrentLocation], args[0]) {
 		fmt.Println("You can't get there from here!")
 		return nil
@@ -99,7 +101,7 @@ func commandMove(myConfig *pokeapi.Config, args []string) error {
 	return nil
 }
 
-func commandExplore(myConfig *pokeapi.Config, _ []string) error {
+func commandExplore(myConfig *gamedata.Config, _ []string) error {
 	locationUrl := GetLocationUrl(myConfig)
 
 	hasEncounters, err := HasEncounters(locationUrl)
@@ -157,7 +159,7 @@ func commandExplore(myConfig *pokeapi.Config, _ []string) error {
 	return nil
 }
 
-func commandCatch(myConfig *pokeapi.Config, args []string) error {
+func commandCatch(myConfig *gamedata.Config, args []string) error {
 	if len(args) == 0 {
 		fmt.Println("please enter a pokemon name")
 	} else {
@@ -189,7 +191,7 @@ func commandCatch(myConfig *pokeapi.Config, args []string) error {
 	return nil
 }
 
-func commandInspect(myConfig *pokeapi.Config, args []string) error {
+func commandInspect(myConfig *gamedata.Config, args []string) error {
 	pokeName := args[0]
 	if pokemon, exists := myConfig.CaughtPokemon[pokeName]; exists {
 		fmt.Printf("Name: %s\n", pokemon.Name)
@@ -209,7 +211,7 @@ func commandInspect(myConfig *pokeapi.Config, args []string) error {
 	return nil
 }
 
-func commandPokedex(myConfig *pokeapi.Config, _ []string) error {
+func commandPokedex(myConfig *gamedata.Config, _ []string) error {
 	fmt.Println("Your Pokedex:")
 	for name := range myConfig.CaughtPokemon {
 		fmt.Printf(" - %s\n", name)
@@ -217,7 +219,7 @@ func commandPokedex(myConfig *pokeapi.Config, _ []string) error {
 	return nil
 }
 
-func commandSave(myConfig *pokeapi.Config, _ []string) error {
+func commandSave(myConfig *gamedata.Config, _ []string) error {
 	jsonSave, err := json.Marshal(myConfig)
 	if err != nil {
 		return fmt.Errorf("save failed: %v", err)
@@ -243,7 +245,7 @@ func commandSave(myConfig *pokeapi.Config, _ []string) error {
 	return nil
 }
 
-func commandLoad(myConfig *pokeapi.Config, _ []string) error {
+func commandLoad(myConfig *gamedata.Config, _ []string) error {
 	configDir, err := os.UserConfigDir()
 	if err != nil {
 		return fmt.Errorf("config dir error: %v", err)

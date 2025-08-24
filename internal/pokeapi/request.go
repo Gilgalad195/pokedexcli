@@ -5,19 +5,10 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gilgalad195/pokedexcli/internal/pokecache"
+	"github.com/gilgalad195/pokedexcli/internal/gamedata"
 )
 
-type Config struct {
-	GameVersion      string                 `json:"game_version"`
-	CurrentLocation  string                 `json:"current_location"`
-	MapCache         *pokecache.Cache       `json:"-"`
-	LocationCache    *pokecache.Cache       `json:"-"`
-	LastFoundPokemon string                 `json:"-"`
-	CaughtPokemon    map[string]PokemonData `json:"caught"`
-}
-
-func FetchData(url string, config *Config) ([]byte, error) {
+func FetchData(url string, config *gamedata.Config) ([]byte, error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err

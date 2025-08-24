@@ -1,9 +1,15 @@
 package gamedata
 
 import (
-	"fmt"
+	"github.com/gilgalad195/pokedexcli/internal/pokecache"
 )
 
-func welcome() {
-	fmt.Println("Hello! And welcome to the world of Pokemon!")
+type Config struct {
+	GameVersion      string                   `json:"game_version"`
+	CurrentLocation  string                   `json:"current_location"`
+	MapCache         *pokecache.Cache         `json:"-"`
+	LocationCache    *pokecache.Cache         `json:"-"`
+	LastFoundPokemon string                   `json:"-"`
+	CaughtPokemon    map[string]PokemonData   `json:"caught"`
+	PartyPokemon     map[string]PokemonStatus `json:"party_pokemon"`
 }

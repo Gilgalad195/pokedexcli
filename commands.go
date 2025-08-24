@@ -1,11 +1,13 @@
 package main
 
-import "github.com/gilgalad195/pokedexcli/internal/pokeapi"
+import (
+	"github.com/gilgalad195/pokedexcli/internal/gamedata"
+)
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(*pokeapi.Config, []string) error
+	callback    func(*gamedata.Config, []string) error
 	//this is so the commands can receive and update the previous/next state.
 }
 
