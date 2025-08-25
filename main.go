@@ -27,7 +27,7 @@ func main() {
 		LocationCache:    locationCache,
 		LastFoundPokemon: "",
 		CaughtPokemon:    map[string]gamedata.PokemonData{},
-		PartyPokemon:     map[string]gamedata.PokemonStatus{},
+		PartyPokemon:     map[int]gamedata.PokemonStatus{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands
@@ -264,5 +264,59 @@ func commandLoad(myConfig *gamedata.Config, _ []string) error {
 	}
 	fmt.Println("Save data loaded!")
 
+	return nil
+}
+
+func commandParty(myConfig *gamedata.Config, args []string) error {
+	subcommand := args[0]
+
+	if subcommand == "" || len(args) < 1 {
+		fmt.Println("Valid arguments:")
+		fmt.Println(" - add/remove/inspect followed by pokemon name")
+		fmt.Println(" - swap followed by two party slots")
+		fmt.Println(" - list")
+		return nil
+	}
+
+	if subcommand == "add" {
+		if len(args) < 2 || args[1] == "" {
+			fmt.Println("Please indicate the caught pokemon you wish to add to your party")
+			return nil
+		}
+		pokename := args[1]
+		PartyAdd(myConfig, pokename)
+	}
+
+	if subcommand == "remove" {
+
+		if len(args) < 2 || args[1] == "" {
+			fmt.Println("Please indicate the pokemon you wish to remove from your party")
+			return nil
+		}
+		pokename := args[1]
+		PartyRemove(myConfig.PartyPokemon, pokename)
+	}
+
+	if subcommand == "inspect" {
+		if len(args) < 2 || args[1] == "" {
+			fmt.Println("Please indicate the party pokemon you wish to inspect")
+			return nil
+		}
+		pokename := args[1]
+		PartyInspect(myConfig.PartyPokemon, pokename)
+	}
+
+	if subcommand == "swap" {
+		if len(args) < 3 {
+			fmt.Println("Swap requires two slot numbers (1-6)")
+			return nil
+		}
+		a, b := args[1], args[2]
+		PartySwap(myConfig.PartyPokemon, a, b)
+	}
+
+	if subcommand == "list" {
+		PartyList(myConfig.PartyPokemon)
+	}
 	return nil
 }

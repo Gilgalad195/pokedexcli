@@ -71,5 +71,10 @@ func init() {
 			description: "Moves to the desired location",
 			callback:    commandMove,
 		},
+		"party": {
+			name:        "party",
+			description: "add, remove, or inspect pokemon in party",
+			callback:    commandParty,
+		},
 	}
 }

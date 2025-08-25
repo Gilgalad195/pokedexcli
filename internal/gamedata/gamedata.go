@@ -1,9 +1,10 @@
 package gamedata
 
 type PokemonStatus struct {
-	MaxHP     int  `json:"max_hitpoints"`
-	CurrentHP int  `json:"current_hitpoints"`
-	Fainted   bool `json:"fainted_status"`
+	Name      string         `json:"name"`
+	Stats     map[string]int `json:"stats"`
+	CurrentHP int            `json:"current_hitpoints"`
+	Fainted   bool           `json:"fainted_status"`
 }
 
 type MapResp struct {
