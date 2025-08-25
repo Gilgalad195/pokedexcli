@@ -48,6 +48,7 @@ func PartyRemove(party map[int]gamedata.PokemonStatus, pokename string) {
 	for i, member := range party {
 		if member.Name == pokename {
 			delete(party, i)
+			fmt.Printf("Removed %s from the party\n", pokename)
 			return
 		}
 	}
