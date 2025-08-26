@@ -132,6 +132,7 @@ func commandCatch(myConfig *gamedata.Config, args []string) error {
 			if success {
 				fmt.Printf("%s was caught!\n", pokeName)
 				myConfig.CaughtPokemon[pokeName] = *pokemon
+				myConfig.LastFoundPokemon = ""
 			} else {
 				fmt.Printf("%s escaped!\n", pokeName)
 			}
