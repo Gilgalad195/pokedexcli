@@ -5,11 +5,11 @@ import (
 )
 
 type Config struct {
-	GameVersion      string                 `json:"game_version"`
-	CurrentLocation  string                 `json:"current_location"`
-	MapCache         *pokecache.Cache       `json:"-"`
-	LocationCache    *pokecache.Cache       `json:"-"`
-	LastFoundPokemon string                 `json:"-"`
-	CaughtPokemon    map[string]PokemonData `json:"caught"`
-	PartyPokemon     map[int]PokemonStatus  `json:"party_pokemon"`
+	GameVersion        string                 `json:"game_version"`
+	CurrentLocation    string                 `json:"current_location"`
+	MapCache           *pokecache.Cache       `json:"-"`
+	LocationCache      *pokecache.Cache       `json:"-"`
+	EncounteredPokemon PokemonStatus          `json:"-"`
+	CaughtPokemon      map[string]PokemonData `json:"caught"`
+	PartyPokemon       map[int]PokemonStatus  `json:"party_pokemon"`
 }

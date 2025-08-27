@@ -47,7 +47,7 @@ func commandMove(myConfig *gamedata.Config, args []string) error {
 	} else {
 		myConfig.CurrentLocation = args[0]
 		fmt.Printf("You are now in '%s'\n", myConfig.CurrentLocation)
-		myConfig.LastFoundPokemon = ""
+		myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
 	}
 	return nil
 }
@@ -99,9 +99,8 @@ func commandExplore(myConfig *gamedata.Config, _ []string) error {
 		if len(availablePokemon) > 0 {
 			roll := rand.Intn(len(availablePokemon))
 			foundPokemon := availablePokemon[roll]
-			myConfig.LastFoundPokemon = foundPokemon
-			fmt.Println("You found a wild Pokemon!")
-			fmt.Printf(" - %s\n\n", foundPokemon)
+			myConfig.EncounteredPokemon = GetSummary(myConfig, foundPokemon)
+			fmt.Printf("A wild %s appeared!\n\n", foundPokemon)
 		} else {
 			fmt.Println(" - there are no pokemon to find")
 		}
@@ -114,7 +113,7 @@ func commandCatch(myConfig *gamedata.Config, args []string) error {
 		fmt.Println("please enter a pokemon name")
 	} else {
 		pokeName := args[0]
-		if pokeName != myConfig.LastFoundPokemon {
+		if pokeName != myConfig.EncounteredPokemon.Name {
 			fmt.Println("that pokemon isn't here right now")
 		} else {
 			pokemon, err := GetPokemonData(pokeName, myConfig)
@@ -132,7 +131,7 @@ func commandCatch(myConfig *gamedata.Config, args []string) error {
 			if success {
 				fmt.Printf("%s was caught!\n", pokeName)
 				myConfig.CaughtPokemon[pokeName] = *pokemon
-				myConfig.LastFoundPokemon = ""
+				myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
 			} else {
 				fmt.Printf("%s escaped!\n", pokeName)
 			}

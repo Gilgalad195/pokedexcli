@@ -17,13 +17,13 @@ func main() {
 	locationCache := pokecache.NewCache(30 * time.Minute)
 
 	myConfig := &gamedata.Config{
-		GameVersion:      "sapphire",
-		CurrentLocation:  "littleroot-town-area",
-		MapCache:         mapCache,
-		LocationCache:    locationCache,
-		LastFoundPokemon: "",
-		CaughtPokemon:    map[string]gamedata.PokemonData{},
-		PartyPokemon:     map[int]gamedata.PokemonStatus{},
+		GameVersion:        "sapphire",
+		CurrentLocation:    "littleroot-town-area",
+		MapCache:           mapCache,
+		LocationCache:      locationCache,
+		EncounteredPokemon: gamedata.PokemonStatus{},
+		CaughtPokemon:      map[string]gamedata.PokemonData{},
+		PartyPokemon:       map[int]gamedata.PokemonStatus{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands

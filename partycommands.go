@@ -20,17 +20,7 @@ func PartyAdd(myConfig *gamedata.Config, pokename string) {
 		}
 	}
 
-	statMap := make(map[string]int)
-	for _, stat := range myConfig.CaughtPokemon[pokename].Stats {
-		statMap[stat.Stat.Name] = stat.BaseStat
-	}
-
-	summary := gamedata.PokemonStatus{
-		Name:      myConfig.CaughtPokemon[pokename].Name,
-		Stats:     statMap,
-		CurrentHP: statMap["hp"],
-		Fainted:   false,
-	}
+	summary := GetSummary(myConfig, pokename)
 
 	for i := 1; i <= 6; i++ {
 		slotKey := i

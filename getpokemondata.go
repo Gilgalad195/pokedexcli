@@ -31,3 +31,19 @@ func GetPokemonData(name string, myConfig *gamedata.Config) (*gamedata.PokemonDa
 	}
 	return pokemon, nil
 }
+
+func GetSummary(myConfig *gamedata.Config, name string) gamedata.PokemonStatus {
+	statMap := make(map[string]int)
+	for _, stat := range myConfig.CaughtPokemon[name].Stats {
+		statMap[stat.Stat.Name] = stat.BaseStat
+	}
+
+	summary := gamedata.PokemonStatus{
+		Name:      myConfig.CaughtPokemon[name].Name,
+		Stats:     statMap,
+		CurrentHP: statMap["hp"],
+		Fainted:   false,
+	}
+
+	return summary
+}
