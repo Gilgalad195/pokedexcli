@@ -20,7 +20,11 @@ func PartyAdd(myConfig *gamedata.Config, pokename string) {
 		}
 	}
 
-	summary := GetSummary(myConfig, pokename)
+	summary, err := GetSummary(myConfig, pokename)
+	if err != nil {
+		fmt.Printf("Failed to get summary: %v", err)
+		return
+	}
 
 	for i := 1; i <= 6; i++ {
 		slotKey := i
@@ -74,7 +78,8 @@ func PartySwap(party map[int]gamedata.PokemonStatus, a, b string) {
 }
 
 func PartyList(party map[int]gamedata.PokemonStatus) {
-	for i, member := range party {
+	for i := 1; i <= 6; i++ {
+		member := party[i]
 		fmt.Printf("Slot %d: %s\n", i, member.Name)
 	}
 }

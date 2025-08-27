@@ -99,8 +99,12 @@ func commandExplore(myConfig *gamedata.Config, _ []string) error {
 		if len(availablePokemon) > 0 {
 			roll := rand.Intn(len(availablePokemon))
 			foundPokemon := availablePokemon[roll]
-			myConfig.EncounteredPokemon = GetSummary(myConfig, foundPokemon)
-			fmt.Printf("A wild %s appeared!\n\n", foundPokemon)
+			myConfig.EncounteredPokemon, err = GetSummary(myConfig, foundPokemon)
+			if err != nil {
+				return fmt.Errorf("explore failed: %v", err)
+			}
+			fmt.Printf("A wild %s appeared!\n", foundPokemon)
+			fmt.Printf("Wild %s has %d/%d HP\n\n", myConfig.EncounteredPokemon.Name, myConfig.EncounteredPokemon.CurrentHP, myConfig.EncounteredPokemon.Stats["hp"])
 		} else {
 			fmt.Println(" - there are no pokemon to find")
 		}
