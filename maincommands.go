@@ -242,15 +242,14 @@ func commandLoad(myConfig *gamedata.Config, _ []string) error {
 }
 
 func commandParty(myConfig *gamedata.Config, args []string) error {
-	subcommand := args[0]
-
-	if subcommand == "" || len(args) < 1 {
+	if len(args) < 1 || args[0] == "" {
 		fmt.Println("Valid arguments:")
 		fmt.Println(" - add/remove/inspect followed by pokemon name")
 		fmt.Println(" - swap followed by two party slots")
 		fmt.Println(" - list")
 		return nil
 	}
+	subcommand := args[0]
 
 	if subcommand == "add" {
 		if len(args) < 2 || args[1] == "" {
