@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/gilgalad195/pokedexcli/internal/gamedata"
 	"github.com/gilgalad195/pokedexcli/internal/pokeapi"
@@ -33,22 +34,41 @@ func commandMap(myConfig *gamedata.Config, _ []string) error {
 
 func commandLook(myConfig *gamedata.Config, _ []string) error {
 	fmt.Printf("You look around '%v' and see the following paths:\n", myConfig.CurrentLocation)
-	availablePaths := WorldMap[myConfig.CurrentLocation]
-	for _, path := range availablePaths {
-		fmt.Printf(" - %s\n", path)
+	if loc, ok := WorldMapV2[myConfig.CurrentLocation]; ok {
+		if loc.North != "" {
+			fmt.Printf("North: %s\n", loc.North)
+		}
+		if loc.East != "" {
+			fmt.Printf("East: %s\n", loc.East)
+		}
+		if loc.South != "" {
+			fmt.Printf("South: %s\n", loc.South)
+		}
+		if loc.West != "" {
+			fmt.Printf("West: %s\n", loc.West)
+		}
+		fmt.Println("")
+	} else {
+		fmt.Println("Problem getting location")
 	}
 	return nil
 }
 
 func commandMove(myConfig *gamedata.Config, args []string) error {
-	if !CheckValidPath(WorldMap[myConfig.CurrentLocation], args[0]) {
-		fmt.Println("You can't get there from here!")
+	if len(args) < 1 {
+		fmt.Println("You move in place and wind up right where you began")
 		return nil
-	} else {
-		myConfig.CurrentLocation = args[0]
-		fmt.Printf("You are now in '%s'\n", myConfig.CurrentLocation)
-		myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
 	}
+	here := WorldMapV2[myConfig.CurrentLocation]
+	there := GetDirections(here, strings.ToLower(args[0]))
+	if there != "" {
+		myConfig.CurrentLocation = there
+		fmt.Printf("You are now in '%s'\n", myConfig.CurrentLocation)
+	} else {
+		fmt.Println("You can't go that way!")
+	}
+
+	myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
 	return nil
 }
 
