@@ -76,5 +76,15 @@ func init() {
 			description: "add, remove, or inspect pokemon in party",
 			callback:    commandParty,
 		},
+		"run": {
+			name:        "run",
+			description: "escape from the current encounter",
+			callback:    commandRun,
+		},
+		"attack": {
+			name:        "run",
+			description: "attacks the encountered pokemon",
+			callback:    commandAttack,
+		},
 	}
 }

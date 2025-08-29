@@ -21,9 +21,9 @@ func main() {
 		CurrentLocation:    "littleroot-town-area",
 		MapCache:           mapCache,
 		LocationCache:      locationCache,
-		EncounteredPokemon: gamedata.PokemonStatus{},
+		EncounteredPokemon: nil,
 		CaughtPokemon:      map[string]gamedata.PokemonData{},
-		PartyPokemon:       map[int]gamedata.PokemonStatus{},
+		PartyPokemon:       map[int]*gamedata.PokemonStatus{},
 	}
 
 	//this is my REPL loop, which looks for user input and executes commands

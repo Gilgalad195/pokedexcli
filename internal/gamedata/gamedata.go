@@ -5,6 +5,7 @@ type PokemonStatus struct {
 	Stats     map[string]int `json:"stats"`
 	CurrentHP int            `json:"current_hitpoints"`
 	Fainted   bool           `json:"fainted_status"`
+	Type      string         `json:"type"` //current state will only use the first type
 }
 
 type MapResp struct {

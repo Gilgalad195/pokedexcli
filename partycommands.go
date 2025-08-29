@@ -14,6 +14,9 @@ func PartyAdd(myConfig *gamedata.Config, pokename string) {
 	}
 
 	for _, member := range myConfig.PartyPokemon {
+		if member == nil {
+			continue // skip empty slots
+		}
 		if member.Name == pokename {
 			fmt.Printf("%s is already in your party!\n", member.Name)
 			return
@@ -28,7 +31,7 @@ func PartyAdd(myConfig *gamedata.Config, pokename string) {
 
 	for i := 1; i <= 6; i++ {
 		slotKey := i
-		if _, exists := myConfig.PartyPokemon[slotKey]; !exists {
+		if member, exists := myConfig.PartyPokemon[slotKey]; !exists || member == nil {
 			myConfig.PartyPokemon[slotKey] = summary
 			fmt.Printf("Added %s to party slot %d!\n", summary.Name, slotKey)
 			return
@@ -38,8 +41,11 @@ func PartyAdd(myConfig *gamedata.Config, pokename string) {
 
 }
 
-func PartyRemove(party map[int]gamedata.PokemonStatus, pokename string) {
+func PartyRemove(party map[int]*gamedata.PokemonStatus, pokename string) {
 	for i, member := range party {
+		if member == nil {
+			continue // skip empty slots
+		}
 		if member.Name == pokename {
 			delete(party, i)
 			fmt.Printf("Removed %s from the party\n", pokename)
@@ -49,8 +55,11 @@ func PartyRemove(party map[int]gamedata.PokemonStatus, pokename string) {
 	fmt.Printf("%s is not in your party!\n", pokename)
 }
 
-func PartyInspect(party map[int]gamedata.PokemonStatus, pokename string) {
+func PartyInspect(party map[int]*gamedata.PokemonStatus, pokename string) {
 	for i, member := range party {
+		if member == nil {
+			continue // skip empty slots
+		}
 		if member.Name == pokename {
 			fmt.Printf("Slot %d:\n", i)
 			fmt.Printf(" - Name: %s\n", member.Name)
@@ -66,7 +75,7 @@ func PartyInspect(party map[int]gamedata.PokemonStatus, pokename string) {
 	fmt.Printf("%s is not in your party!\n", pokename)
 }
 
-func PartySwap(party map[int]gamedata.PokemonStatus, a, b string) {
+func PartySwap(party map[int]*gamedata.PokemonStatus, a, b string) {
 	intA, errA := strconv.Atoi(a)
 	intB, errB := strconv.Atoi(b)
 	if errA != nil || errB != nil || intA < 1 || intA > 6 || intB < 1 || intB > 6 {
@@ -77,9 +86,36 @@ func PartySwap(party map[int]gamedata.PokemonStatus, a, b string) {
 	party[intA], party[intB] = party[intB], party[intA]
 }
 
-func PartyList(party map[int]gamedata.PokemonStatus) {
+func PartyList(party map[int]*gamedata.PokemonStatus) {
 	for i := 1; i <= 6; i++ {
-		member := party[i]
-		fmt.Printf("Slot %d: %s\n", i, member.Name)
+		if party[i] != nil {
+			member := party[i]
+			fmt.Printf("Slot %d: %s\n", i, member.Name)
+		} else {
+			fmt.Printf("Slot %d: Empty\n", i)
+		}
 	}
+}
+
+func PartyHeal(myConfig *gamedata.Config, target string) error {
+	for _, member := range myConfig.PartyPokemon {
+		if member == nil {
+			continue // skip empty slots
+		}
+		if member.Name == target {
+			if myConfig.EncounteredPokemon != nil {
+				member.CurrentHP += 20
+				fmt.Printf("%s was healed for 20\n", target)
+				fmt.Printf("%s has %d HP\n", target, member.CurrentHP)
+				return nil
+			} else {
+				member.CurrentHP = member.Stats["hp"]
+				fmt.Printf("%s is healthy again!\n", target)
+				return nil
+			}
+		} else {
+			fmt.Printf("%s is not in your party!\n", target)
+		}
+	}
+	return nil
 }

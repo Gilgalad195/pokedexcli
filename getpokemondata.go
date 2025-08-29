@@ -32,14 +32,14 @@ func GetPokemonData(name string, myConfig *gamedata.Config) (*gamedata.PokemonDa
 	return pokemon, nil
 }
 
-func GetSummary(myConfig *gamedata.Config, name string) (gamedata.PokemonStatus, error) {
+func GetSummary(myConfig *gamedata.Config, name string) (*gamedata.PokemonStatus, error) {
 	var data gamedata.PokemonData
 	if caught, ok := myConfig.CaughtPokemon[name]; ok {
 		data = caught
 	} else {
 		fetched, err := GetPokemonData(name, myConfig)
 		if err != nil {
-			return gamedata.PokemonStatus{}, fmt.Errorf("unable to get pokemon data: %v", err)
+			return &gamedata.PokemonStatus{}, fmt.Errorf("unable to get pokemon data: %v", err)
 		}
 		data = *fetched
 	}
@@ -49,12 +49,15 @@ func GetSummary(myConfig *gamedata.Config, name string) (gamedata.PokemonStatus,
 		statMap[stat.Stat.Name] = stat.BaseStat
 	}
 
+	primaryType := data.Types[0].Type.Name
+
 	summary := gamedata.PokemonStatus{
 		Name:      data.Name,
 		Stats:     statMap,
 		CurrentHP: statMap["hp"],
 		Fainted:   false,
+		Type:      primaryType,
 	}
 
-	return summary, nil
+	return &summary, nil
 }

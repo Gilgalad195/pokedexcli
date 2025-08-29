@@ -68,7 +68,7 @@ func commandMove(myConfig *gamedata.Config, args []string) error {
 		fmt.Println("You can't go that way!")
 	}
 
-	myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
+	myConfig.EncounteredPokemon = nil
 	return nil
 }
 
@@ -137,7 +137,7 @@ func commandCatch(myConfig *gamedata.Config, args []string) error {
 		fmt.Println("please enter a pokemon name")
 	} else {
 		pokeName := args[0]
-		if pokeName != myConfig.EncounteredPokemon.Name {
+		if pokeName != myConfig.EncounteredPokemon.Name || myConfig.EncounteredPokemon == nil {
 			fmt.Println("that pokemon isn't here right now")
 		} else {
 			pokemon, err := GetPokemonData(pokeName, myConfig)
@@ -146,18 +146,25 @@ func commandCatch(myConfig *gamedata.Config, args []string) error {
 			}
 
 			fmt.Printf("Throwing a Pokeball at %s...\n", pokeName)
-			roll := rand.Intn(pokemon.BaseExperience)
+			roll := rand.Intn(pokemon.BaseExperience + myConfig.EncounteredPokemon.CurrentHP)
 			var success bool
-			if roll <= 40 {
+			if roll <= 50 {
 				success = true
 			}
 
 			if success {
 				fmt.Printf("%s was caught!\n", pokeName)
 				myConfig.CaughtPokemon[pokeName] = *pokemon
-				myConfig.EncounteredPokemon = gamedata.PokemonStatus{}
+				myConfig.EncounteredPokemon = nil
 			} else {
-				fmt.Printf("%s escaped!\n", pokeName)
+				fmt.Printf("%s broke free!\n", pokeName)
+				mine := myConfig.PartyPokemon[1]
+				theirs := myConfig.EncounteredPokemon
+				PokemonAttack(theirs, mine)
+				if mine.Fainted {
+					fmt.Printf("%s got away!", theirs.Name)
+					myConfig.EncounteredPokemon = nil
+				}
 			}
 		}
 	}
@@ -244,7 +251,7 @@ func commandLoad(myConfig *gamedata.Config, _ []string) error {
 func commandParty(myConfig *gamedata.Config, args []string) error {
 	if len(args) < 1 || args[0] == "" {
 		fmt.Println("Valid arguments:")
-		fmt.Println(" - add/remove/inspect followed by pokemon name")
+		fmt.Println(" - add/remove/inspect/heal followed by pokemon name")
 		fmt.Println(" - swap followed by two party slots")
 		fmt.Println(" - list")
 		return nil
@@ -290,6 +297,38 @@ func commandParty(myConfig *gamedata.Config, args []string) error {
 
 	if subcommand == "list" {
 		PartyList(myConfig.PartyPokemon)
+	}
+
+	if subcommand == "heal" {
+		pokename := args[1]
+		PartyHeal(myConfig, pokename)
+	}
+	return nil
+}
+
+func commandRun(myConfig *gamedata.Config, _ []string) error {
+	roll := rand.Intn(20)
+	if roll >= 8 {
+		fmt.Println("You successfully escaped!")
+		myConfig.EncounteredPokemon = nil
+		return nil
+	}
+	fmt.Println("You were unable to escape!")
+	// add attack from wild pokemon here
+	return nil
+}
+
+func commandAttack(myConfig *gamedata.Config, _ []string) error {
+	if myConfig.PartyPokemon[1] == nil {
+		fmt.Println("You have no pokemon in Slot 1!")
+		return nil
+	}
+	mine := myConfig.PartyPokemon[1]
+	theirs := myConfig.EncounteredPokemon
+	PokemonAttack(mine, theirs)
+	PokemonAttack(theirs, mine)
+	if theirs.Fainted {
+		myConfig.EncounteredPokemon = nil
 	}
 	return nil
 }
