@@ -307,6 +307,9 @@ func commandParty(myConfig *gamedata.Config, args []string) error {
 }
 
 func commandRun(myConfig *gamedata.Config, _ []string) error {
+	if myConfig.EncounteredPokemon == nil {
+		fmt.Println("You are not in an encounter.")
+	}
 	roll := rand.Intn(20)
 	if roll >= 8 {
 		fmt.Println("You successfully escaped!")
@@ -319,6 +322,9 @@ func commandRun(myConfig *gamedata.Config, _ []string) error {
 }
 
 func commandAttack(myConfig *gamedata.Config, _ []string) error {
+	if myConfig.EncounteredPokemon == nil {
+		fmt.Println("You are not in an encounter.")
+	}
 	if myConfig.PartyPokemon[1] == nil {
 		fmt.Println("You have no pokemon in Slot 1!")
 		return nil

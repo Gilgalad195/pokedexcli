@@ -98,6 +98,9 @@ func PartyList(party map[int]*gamedata.PokemonStatus) {
 }
 
 func PartyHeal(myConfig *gamedata.Config, target string) error {
+	if myConfig.EncounteredPokemon != nil {
+		defer PokemonAttack(myConfig.EncounteredPokemon, myConfig.PartyPokemon[1])
+	}
 	for _, member := range myConfig.PartyPokemon {
 		if member == nil {
 			continue // skip empty slots
