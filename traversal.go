@@ -69,15 +69,15 @@ var WorldMapV2 = map[string]LocationArea{
 
 	// Route 102 → Petalburg City → Route 104 South
 	"hoenn-route-102-area": {
-		North: "petalburg-city-area",
-		South: "oldale-town-area",
+		West: "petalburg-city-area",
+		East: "oldale-town-area",
 	},
 	"hoenn-route-103-area": {
 		South: "Oldale Town",
 	},
 	"petalburg-city-area": {
-		North: "hoenn-route-104-area",
-		South: "hoenn-route-102-area",
+		West: "hoenn-route-104-area",
+		East: "hoenn-route-102-area",
 	},
 	"hoenn-route-104-area": {
 		North: "rustboro-city-area",
